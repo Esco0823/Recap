@@ -3,6 +3,7 @@ package project.mobile.cs.fsu.edu.recap;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 public class RecapView extends ListActivity {
     ListView listView;
@@ -51,7 +53,11 @@ public class RecapView extends ListActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String event = (String)parent.getItemAtPosition(position);
                 if(event.contains(PhoneCallReceiver.LOCATION_UPDATE)){
-                    Toast.makeText(RecapView.this, "Pretend you can see the location\non the map", Toast.LENGTH_LONG).show();
+                    //open Google Maps and display location
+                    String uri = String.format(Locale.ENGLISH, "geo:%f,%f?q=%f,%f", MainActivity.lastNight.get(position).getLatitude(), MainActivity.lastNight.get(position).getLongitude(), MainActivity.lastNight.get(position).getLatitude(), MainActivity.lastNight.get(position).getLongitude());
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                    startActivity(intent);
+                    //Toast.makeText(RecapView.this, "Pretend you can see the location\non the map", Toast.LENGTH_LONG).show();
                 }
             }
         }));
