@@ -21,15 +21,13 @@ public class IncomingSmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        time = "" + System.currentTimeMillis();
+        time = "" + MainActivity.TimeFormat();
         Bundle bundle = intent.getExtras();
-        //get the sms received, retreive the phone number, and add the event
+        //get the sms received, retrieve the phone number, and add the event
         if(bundle != null){
             Object[] pdus = (Object[]) bundle.get("pdus");
             SmsMessage sms = SmsMessage.createFromPdu((byte[])pdus[0]);
             newEvent = new RecapEvent(INCOMING_SMS, sms.getDisplayOriginatingAddress(), -1.0, -1.0, "", time);
-            Log.i("phone number", newEvent.getPhoneNumber());
-            Log.i("type" , newEvent.getType());
             MainActivity.lastNight.add(newEvent);
         }
     }

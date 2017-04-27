@@ -21,7 +21,7 @@ public class OutgoingSmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        time = "" + System.currentTimeMillis();
+        time = "" + MainActivity.TimeFormat();
         Bundle bundle = intent.getExtras();
         //get the sms sent, retreive the phone number, and add the event
         if(bundle != null){

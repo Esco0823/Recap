@@ -29,7 +29,7 @@ public class PhoneCallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        time = "" + System.currentTimeMillis();
+        time = "" + MainActivity.TimeFormat();
         //make the receiver listen for changes in call state (ringing, idle, etc)
         try{
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);

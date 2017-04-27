@@ -22,7 +22,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -58,9 +60,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 //saves address, longitude, latitude, and time of location change as an event
                 Geocoder gecoder = new Geocoder(getApplicationContext());
                 try {
-                    time = "" + System.currentTimeMillis();
+                    time = "" + TimeFormat();
                     currentAddress = gecoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
-                    address = currentAddress.get(0).getAddressLine(0);
+
+                    if(currentAddress.isEmpty())
+                        address = "No Nearby Locations";
+                    else
+                        address = currentAddress.get(0).getAddressLine(0);
+
                     RecapEvent newEvent = new RecapEvent(PhoneCallReceiver.LOCATION_UPDATE, "", location.getLatitude(), location.getLongitude(), address, time);
                     lastNight.add(newEvent);
 
@@ -89,7 +96,9 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     public void StartClicked(View view) {
         //starts keeping tracking of current location, BroadcastReceiver for messages/phone calls
         Recap.setClickable(true);
+        Recap.setVisibility(Recap.VISIBLE);
         Start.setClickable(false);
+        Start.setVisibility(Recap.INVISIBLE);
         lastNight.clear();
         //start google api client
         googleApiClient.connect();
@@ -117,10 +126,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         StopLocationUpdates();
         googleApiClient.disconnect();
         Start.setClickable(true);
-
-        for(int i = 0; i < MainActivity.lastNight.size(); i++){
-            Log.i("Last Night Event " + i, MainActivity.lastNight.get(i).getType() + " " + lastNight.get(i).getTime());
-        }
+        Start.setVisibility(Start.VISIBLE);
 
         //opens recap activity to show an overview of the night
         Intent intent = new Intent(this, RecapView.class);
@@ -152,5 +158,22 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     //stops listening for location updates
     protected void StopLocationUpdates() throws SecurityException{
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient,locationListener);
+    }
+
+    //gets the current time as a string
+    public static String TimeFormat(){
+        Calendar c = Calendar.getInstance();
+        int minutes = c.get(Calendar.MINUTE);
+        int hours = c.get(Calendar.HOUR);
+        int ampm = c.get(Calendar.AM_PM);
+        String am_pm = "";
+        if(ampm == 0){ am_pm = "AM";}
+        else if(ampm == 1){ am_pm = "PM";}
+
+        if(minutes < 10)
+            return hours + ":0" + minutes + "" + am_pm;
+        else
+            return hours + ":" + minutes + " " + am_pm;
+
     }
 }
