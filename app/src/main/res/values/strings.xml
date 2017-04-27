@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Recap</string>
+    <string name="title_activity_recap_view">RecapView</string>
+</resources>
