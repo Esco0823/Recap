@@ -4,6 +4,7 @@ package project.mobile.cs.fsu.edu.recap;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,26 +27,14 @@ public class RecapView extends ListActivity {
         listView = getListView();
 
         for(int i = 0; i < MainActivity.lastNight.size(); i++){
-            switch(MainActivity.lastNight.get(i).getType()){
-                case PhoneCallReceiver.INCOMING_CALL:
-                    displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getPhoneNumber());
-                    break;
-                case PhoneCallReceiver.INCOMING_SMS:
-                    displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getPhoneNumber());
+            Log.i("event", MainActivity.lastNight.get(i).getType());
 
-                    break;
-                case PhoneCallReceiver.LOCATION_UPDATE:
-                    displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getAddress());
+            if(MainActivity.lastNight.get(i).getType().equals(PhoneCallReceiver.LOCATION_UPDATE)){
+                displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getAddress());
+            }
+            else{
+                displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getPhoneNumber());
 
-                    break;
-                case PhoneCallReceiver.OUTGOING_CALL:
-                    displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getPhoneNumber());
-
-                    break;
-                case PhoneCallReceiver.OUTGOING_SMS:
-                    displayEvents.add(i, MainActivity.lastNight.get(i).getType() + ": " + MainActivity.lastNight.get(i).getPhoneNumber());
-
-                    break;
             }
         }
 
@@ -61,6 +50,10 @@ public class RecapView extends ListActivity {
                 }
             }
         }));
+
+        for(int i = 0; i < displayEvents.size(); i++){
+            Log.i("Display Event " + i, displayEvents.get(i));
+        }
     }
 
     @Override

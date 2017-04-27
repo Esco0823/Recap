@@ -32,7 +32,9 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     public PhoneCallReceiver phoneCalls;
     public IncomingSmsReceiver incomingSMS;
     public OutgoingSmsReceiver outgoingSMS;
-    public IntentFilter filter;
+    public IntentFilter callFilter;
+    public IntentFilter incSmsFilter;
+    public IntentFilter outSmsFilter;
 
     LocationListener locationListener;
     LocationManager locationManager;
@@ -57,7 +59,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 Geocoder gecoder = new Geocoder(getApplicationContext());
                 try {
                     time = "" + System.currentTimeMillis();
-                            // DateFormat.getDateTimeInstance().format(new Date());
                     currentAddress = gecoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
                     address = currentAddress.get(0).getAddressLine(0);
                     RecapEvent newEvent = new RecapEvent(PhoneCallReceiver.LOCATION_UPDATE, "", location.getLatitude(), location.getLongitude(), address, time);
@@ -95,16 +96,16 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
         //register receivers
         phoneCalls = new PhoneCallReceiver();
-        filter = new IntentFilter("android.intent.action.PHONE_STATE");
-        registerReceiver(phoneCalls, filter);
+        callFilter = new IntentFilter("android.intent.action.PHONE_STATE");
+        registerReceiver(phoneCalls, callFilter);
 
         incomingSMS = new IncomingSmsReceiver();
-        filter = new IntentFilter("android.intent.Telephony.SMS_RECEIVED");
-        registerReceiver(incomingSMS, filter);
+        incSmsFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(incomingSMS, incSmsFilter);
 
         outgoingSMS = new OutgoingSmsReceiver();
-        filter = new IntentFilter("android.provider.Telephony.SMS_SENT");
-        registerReceiver(outgoingSMS, filter);
+        outSmsFilter = new IntentFilter("android.provider.Telephony.SMS_SENT");
+        registerReceiver(outgoingSMS, outSmsFilter);
     }
 
     public void RecapClicked(View view) {
@@ -118,7 +119,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         Start.setClickable(true);
 
         for(int i = 0; i < MainActivity.lastNight.size(); i++){
-            Log.i("Event " + i, MainActivity.lastNight.get(i).getType() + " " + lastNight.get(i).getTime());
+            Log.i("Last Night Event " + i, MainActivity.lastNight.get(i).getType() + " " + lastNight.get(i).getTime());
         }
 
         //opens recap activity to show an overview of the night
@@ -139,7 +140,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     }
 
-    //starts listeing for location updates
+    //starts listening for location updates
     protected void StartLocationUpdates() throws SecurityException{
         LocationRequest LocationRequest = new LocationRequest();
         LocationRequest.setInterval(10000);

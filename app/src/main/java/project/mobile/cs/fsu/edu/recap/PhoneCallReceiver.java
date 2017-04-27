@@ -30,8 +30,7 @@ public class PhoneCallReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         time = "" + System.currentTimeMillis();
-        //DateFormat.getDateTimeInstance().format(new Date());
-        //make
+        //make the receiver listen for changes in call state (ringing, idle, etc)
         try{
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             MyPhoneStateListener phoneListener = new MyPhoneStateListener();
@@ -42,42 +41,36 @@ public class PhoneCallReceiver extends BroadcastReceiver {
         }
     }
 
+    //class to handle changes in phone state
     private class MyPhoneStateListener extends PhoneStateListener {
 
         public void onCallStateChanged(int state, String incomingNumber) {
-            switch(state){
-                case TelephonyManager.CALL_STATE_IDLE:
-                    Log.i("stop adding idle ", Integer.toString(state));
-                    //if the events are the same (to stop duplicate adding
-                    if(MainActivity.lastNight.size() > 2) {
-                        if (MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getPhoneNumber().
-                                equals(MainActivity.lastNight.get(MainActivity.lastNight.size() - 2).getPhoneNumber()) &&
-                                MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getType().
-                                        equals(MainActivity.lastNight.get(MainActivity.lastNight.size() - 2).getType())) {
-                            MainActivity.lastNight.remove(MainActivity.lastNight.size()-1);
-                        }
-                    }
+            //there is no phone activity
+            if(state == TelephonyManager.CALL_STATE_IDLE){
 
-
-                    break;
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    Log.i("stop adding offhook ", Integer.toString(state));
-                    break;
-                case TelephonyManager.CALL_STATE_RINGING:
-                    newEvent = new RecapEvent(INCOMING_CALL, incomingNumber, -1.0, -1.0, "", time);
-                    MainActivity.lastNight.add(newEvent);
-                    //if the events are the same (to stop duplicate adding
-                    if(MainActivity.lastNight.size() > 2) {
-                        if (MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getPhoneNumber().
-                                equals(MainActivity.lastNight.get(MainActivity.lastNight.size() - 2).getPhoneNumber()) &&
-                                MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getType().
-                                        equals(MainActivity.lastNight.get(MainActivity.lastNight.size() - 2).getType())) {
-                            MainActivity.lastNight.remove(MainActivity.lastNight.size()-1);
-                        }
-                    }
-                    break;
             }
-            Log.i("state", Integer.toString(state));
+            //checking for outgoing call
+            else if(state == TelephonyManager.CALL_STATE_OFFHOOK){
+                newEvent = new RecapEvent(OUTGOING_CALL, incomingNumber, -1.0, -1.0, "", time);
+                MainActivity.lastNight.add(newEvent);
+            }
+            //checking for incoming call
+            else if(state == TelephonyManager.CALL_STATE_RINGING){
+                newEvent = new RecapEvent(INCOMING_CALL, incomingNumber, -1.0, -1.0, "", time);
+
+                if(!MainActivity.lastNight.isEmpty()) {
+                    //ignores duplicate objects being made from the same call (weird error where 2 or 3 newEvent objects are inserted and not just 1)
+                    if (MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getPhoneNumber().equals(newEvent.getPhoneNumber()) &&
+                            MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getType().equals(newEvent.getType())) {
+                    }
+                    else{
+                        MainActivity.lastNight.add(newEvent);
+                    }
+                }
+                else{
+                    MainActivity.lastNight.add(newEvent);
+                }
+            }
         }
     }
 
