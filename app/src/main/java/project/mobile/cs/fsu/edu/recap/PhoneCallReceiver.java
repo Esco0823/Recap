@@ -22,9 +22,7 @@ import java.util.Date;
 public class PhoneCallReceiver extends BroadcastReceiver {
     //types of events
     public static final String INCOMING_CALL = "Incoming Call";
-    public static final String INCOMING_SMS = "Incoming SMS";
     public static final String OUTGOING_CALL = "Outgoing Call";
-    public static final String OUTGOING_SMS = "Outgoing SMS";
     public static final String LOCATION_UPDATE = "Location Update";
     String time = "";
 

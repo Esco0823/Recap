@@ -36,7 +36,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     public IncomingSmsReceiver incomingSMS;
     public IntentFilter callFilter;
     public IntentFilter incSmsFilter;
-    public IntentFilter outSmsFilter;
 
     ContentResolver contentResolver;
     SmsOutObserver smsOutObserver;
@@ -91,9 +90,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                     .addApi(LocationServices.API)
                     .build();
         }
-
-        //register broadcast receiver
-
     }
 
     public void StartClicked(View view) {
@@ -129,6 +125,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         //unregister observer
         contentResolver.unregisterContentObserver(smsOutObserver);
 
+        //stop google api client
         StopLocationUpdates();
         googleApiClient.disconnect();
         Start.setClickable(true);
@@ -183,7 +180,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     }
 
-    //outgoing SMS content observer
+    //outgoing SMS content observer (broken, incoming sms also trigger it)
     class SmsOutObserver extends ContentObserver{
         public SmsOutObserver(Handler handler){
             super(handler);

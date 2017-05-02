@@ -10,11 +10,8 @@ import android.util.Log;
 
 public class IncomingSmsReceiver extends BroadcastReceiver {
     //types of events
-    public static final String INCOMING_CALL = "Incoming Call";
     public static final String INCOMING_SMS = "Incoming SMS";
-    public static final String OUTGOING_CALL = "Outgoing Call";
     public static final String OUTGOING_SMS = "Outgoing SMS";
-    public static final String LOCATION_UPDATE = "Location Update";
 
     RecapEvent newEvent;
     String time = "";

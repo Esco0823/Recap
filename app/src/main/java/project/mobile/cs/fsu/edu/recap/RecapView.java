@@ -60,12 +60,10 @@ public class RecapView extends ListActivity {
                 displayEvents.add(i,MainActivity.lastNight.get(i).getTime() + ":\nType - " +
                         MainActivity.lastNight.get(i).getType() + "\nContact Name - " +
                         getContactName(getApplicationContext(), MainActivity.lastNight.get(i).getPhoneNumber()) + "\n");
-                        //PhoneNumberFormat(MainActivity.lastNight.get(i).getPhoneNumber()) + "\n");
-
             }
         }
 
-        listAdapter = new ArrayAdapter<String>(this, R.layout.custom_textview, displayEvents);
+        listAdapter = new ArrayAdapter<>(this, R.layout.custom_textview, displayEvents);
         setListAdapter(listAdapter);
 
         //go to MapView so user can see the location selected on the map
@@ -87,18 +85,6 @@ public class RecapView extends ListActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-    }
-
-    //converts 10 digits into phone number format (XXX) XXX-XXXX
-    public String PhoneNumberFormat(String pn){
-        if(pn.isEmpty()){
-            return "No Number";
-        }
-        String correct = "(" + pn.charAt(0) + pn.charAt(1) + pn.charAt(2) + ") " +
-                pn.charAt(3) + pn.charAt(4) + pn.charAt(5) + "-" +
-                pn.charAt(6) + pn.charAt(7) + pn.charAt(8) + pn.charAt(9);
-        return correct;
-
     }
 
     //find contact name using phone number
@@ -124,6 +110,7 @@ public class RecapView extends ListActivity {
         return contactName;
     }
 
+    //converts time from a string to an int(ie "3:58 PM" = 1558)
     public int TimeStringToInt(String time){
         int newTime, hr, min;
         Log.i("time", time);

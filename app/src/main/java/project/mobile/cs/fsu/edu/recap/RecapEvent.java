@@ -9,11 +9,17 @@ import android.location.Location;
 
 
 public class RecapEvent {
+    //type of event
     private String type;
+    //phone number (if sms or call)
     private String phoneNumber;
+    //latitude (if location update)
     private double latitude;
+    //longitude (if location update)
     private double longitude;
+    //address (if location update)
     private String address;
+    //time of event
     private String time;
 
     RecapEvent(){}
@@ -27,6 +33,7 @@ public class RecapEvent {
         time = ti;
     }
 
+    //getters for member data
     public String getType(){
         return type;
     }
