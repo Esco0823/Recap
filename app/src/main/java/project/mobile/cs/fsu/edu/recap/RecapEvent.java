@@ -37,7 +37,6 @@ public class RecapEvent {
 
     public double getLatitude(){
         return latitude;
-
     }
 
     public double getLongitude() {

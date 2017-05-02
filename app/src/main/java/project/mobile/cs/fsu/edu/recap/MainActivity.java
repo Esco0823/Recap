@@ -1,16 +1,19 @@
 package project.mobile.cs.fsu.edu.recap;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.icu.text.DateFormat;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,10 +25,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -33,10 +34,12 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     public static ArrayList<RecapEvent> lastNight = new ArrayList<>();
     public PhoneCallReceiver phoneCalls;
     public IncomingSmsReceiver incomingSMS;
-    public OutgoingSmsReceiver outgoingSMS;
     public IntentFilter callFilter;
     public IntentFilter incSmsFilter;
     public IntentFilter outSmsFilter;
+
+    ContentResolver contentResolver;
+    SmsOutObserver smsOutObserver;
 
     LocationListener locationListener;
     LocationManager locationManager;
@@ -112,16 +115,19 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         incSmsFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(incomingSMS, incSmsFilter);
 
-        outgoingSMS = new OutgoingSmsReceiver();
-        outSmsFilter = new IntentFilter("android.provider.Telephony.SMS_SENT");
-        registerReceiver(outgoingSMS, outSmsFilter);
+        //register content observer
+        contentResolver = getApplicationContext().getContentResolver();
+        smsOutObserver = new SmsOutObserver(new Handler());
+        contentResolver.registerContentObserver(Uri.parse("content://sms"), true, smsOutObserver);
     }
 
     public void RecapClicked(View view) {
         //unregister receivers
         unregisterReceiver(phoneCalls);
         unregisterReceiver(incomingSMS);
-        unregisterReceiver(outgoingSMS);
+
+        //unregister observer
+        contentResolver.unregisterContentObserver(smsOutObserver);
 
         StopLocationUpdates();
         googleApiClient.disconnect();
@@ -171,9 +177,49 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         else if(ampm == 1){ am_pm = "PM";}
 
         if(minutes < 10)
-            return hours + ":0" + minutes + "" + am_pm;
+            return hours + ":0" + minutes + " " + am_pm;
         else
             return hours + ":" + minutes + " " + am_pm;
 
     }
+
+    //outgoing SMS content observer
+    class SmsOutObserver extends ContentObserver{
+        public SmsOutObserver(Handler handler){
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange){
+            super.onChange(selfChange);
+            Uri uriSms = Uri.parse("content://sms");
+            Cursor cur = getApplicationContext().getContentResolver().query(uriSms, null, null, null, null);
+            // last SMS sent
+            cur.moveToNext();
+            String type = cur.getString(cur.getColumnIndex("type"));
+            //if outgoing
+            if(type.equals("2")) {
+                String content = cur.getString(cur.getColumnIndex("address"));
+                time = "" + MainActivity.TimeFormat();
+                RecapEvent newEvent = new RecapEvent(IncomingSmsReceiver.OUTGOING_SMS, content, -1.0, -1.0, "", time);
+                if(!MainActivity.lastNight.isEmpty()) {
+                    //ignores duplicate objects being made from the same call (weird error where 2 or 3 newEvent objects are inserted and not just 1)
+                    if (MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getPhoneNumber().equals(newEvent.getPhoneNumber()) &&
+                            MainActivity.lastNight.get(MainActivity.lastNight.size() - 1).getType().equals(newEvent.getType())) {
+                    }
+                    else{
+                        if(!newEvent.getPhoneNumber().equals("")) {
+                            MainActivity.lastNight.add(newEvent);
+                        }
+                    }
+                }
+                else{
+                    if(!newEvent.getPhoneNumber().equals("")) {
+                        MainActivity.lastNight.add(newEvent);
+                    }
+                }
+            }
+        }
+    }
+
 }
